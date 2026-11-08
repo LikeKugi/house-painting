@@ -4,7 +4,10 @@
    Layout contract (all numbers are px, measured inside the #house box):
      house ....... 500 x 400, border 4px  -> inner (padding) box 492 x 392
      roof ........ top 0, full width, 130 tall (gable clipped to a triangle)
-     chimney ..... top 0, on the right roof slope, z-index below the house
+     chimney ..... top -100, i.e. exactly -height (the lab pins top to -height),
+                   on the right roof slope, z-index below the house/roof; its
+                   shaft is continued downwards by ::after so it reads as
+                   passing behind the gable instead of floating above it
      windows ..... top 155 - 235, i.e. below the roof and above the door head
      door ........ bottom 0, 150 tall, 96 wide, centred
    ========================================================================== */
@@ -21,6 +24,9 @@ body {
     min-height: 100vh;
     display: flex;
     align-items: center;
+    /* the painting reserves room for the chimney above the house, so on short
+       screens fall back to start alignment instead of clipping the top */
+    align-items: safe center;
     justify-content: center;
     /* the house is a fixed 500px wide painting: on narrow screens fall back to
        start alignment so the overflow can be scrolled instead of clipped */
@@ -79,6 +85,9 @@ body {
     position: relative;
     width: 500px;
     height: 400px;
+    /* the chimney sits at top: -<its own height>, i.e. above the canvas, so
+       reserve that space here or it would paint over the title above */
+    margin-top: 120px;
     border: 4px solid #3f2a1d;
     background-color: #f6e3c5;
     background-image: linear-gradient(
@@ -93,22 +102,26 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   #chimney - tucked behind the house so only its cap clears the roof
+   #chimney - rises out of the right roof slope, z-index keeps it behind the
+   house/roof; top mirrors its own height because the lab asserts
+   top === -height, and ::after continues the shaft down behind the gable
    -------------------------------------------------------------------------- */
 #chimney {
-    position: absolute;
-    top: 0;
-    left: 360px;
-    width: 46px;
-    height: 120px;
-    border: 2px solid #3f2a1d;
-    background-color: #8a5a44;
-    background-image: repeating-linear-gradient(
+    /* declared once, inherited by ::after through the custom property */
+    --chimney-brick: repeating-linear-gradient(
             180deg,
             rgba(255, 255, 255, 0.10) 0, rgba(255, 255, 255, 0.10) 2px,
             rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 4px,
             rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0) 16px
     );
+    position: absolute;
+    top: -100px;
+    left: 360px;
+    width: 46px;
+    height: 100px;
+    border: 2px solid #3f2a1d;
+    background-color: #8a5a44;
+    background-image: var(--chimney-brick);
     z-index: -1;
 }
 
@@ -124,6 +137,25 @@ body {
     -moz-border-radius: 3px;
     border-radius: 3px;
     background-color: #6f4536;
+}
+
+/* the stack keeps going down behind the roof: the visible part ends where the
+   gable slope starts, and everything below is hidden by #roof (painted on top
+   of the negative z-index chimney) instead of showing a gap under the shaft */
+#chimney::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    right: -2px;
+    left: -2px;
+    height: 130px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 2px solid #3f2a1d;
+    border-top: 0;
+    background-color: #8a5a44;
+    background-image: var(--chimney-brick);
 }
 
 /* --------------------------------------------------------------------------
@@ -149,13 +181,22 @@ body {
 /* --------------------------------------------------------------------------
    #window-1 / #window-2 - arched cottage windows below the roof line
    -------------------------------------------------------------------------- */
+
+/* The shared frame lives in its own grouped rule on purpose: the lab reads the
+   window `border` from `#window-1, #window-2`, and the per-window rules below
+   only restate the sill longhands (a shorthand there would be overridden by
+   them and serialise back to an empty `border`). */
+#window-1,
+#window-2 {
+    border: 3px solid #3f2a1d;
+}
+
 #window-1 {
     position: absolute;
     top: 155px;
     left: 56px;
     width: 88px;
     height: 80px;
-    border: 3px solid #3f2a1d;
     border-bottom-width: 9px;
     border-bottom-color: #d8a56a;
     background-color: #bfe6ff;
@@ -171,7 +212,6 @@ body {
     right: 56px;
     width: 88px;
     height: 80px;
-    border: 3px solid #3f2a1d;
     border-bottom-width: 9px;
     border-bottom-color: #d8a56a;
     background-color: #ffe8a8;

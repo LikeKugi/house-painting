@@ -139,7 +139,9 @@ const checks = [
     ],
     [
         "44. #chimney top puts it at the top of the house",
-        px(get("#chimney", "top")) >= -20 && px(get("#chimney", "top")) <= 20,
+        // mirrors the lab: assert.approximately(top, -height, 2) - the chimney is
+        // lifted exactly its own height above the top edge of the canvas
+        Math.abs(px(get("#chimney", "top")) + chimney.height) <= 2,
     ],
     ["45. #chimney z-index puts it behind the house", px(get("#chimney", "z-index")) < 0],
     [
