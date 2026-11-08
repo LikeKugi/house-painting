@@ -1,10 +1,10 @@
 {
   "name": "house-painting",
   "version": "1.0.0",
-  "description": "",
+  "description": "freeCodeCamp CSS lab: build a house painting with absolute positioning",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node contract-test.mjs"
   },
   "private": true
 }
