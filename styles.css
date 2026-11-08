@@ -22,6 +22,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    /* the house is a fixed 500px wide painting: on narrow screens fall back to
+       start alignment so the overflow can be scrolled instead of clipped */
+    justify-content: safe center;
     padding: 40px 16px;
     font-family: "Trebuchet MS", "Segoe UI", "Helvetica Neue", sans-serif;
     color: #4a2f1d;
